@@ -1,0 +1,2 @@
+turtlejoy
+-DCATKIN_DEVEL_PREFIX=/home/pi/ros/turtlejoy_ws/devel -DCMAKE_INSTALL_PREFIX=/home/pi/ros/turtlejoy_ws/install -G Unix Makefiles

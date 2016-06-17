@@ -1,0 +1,8 @@
+prefix=/home/pi/ros/turtlejoy_ws/install
+
+Name: turtlejoy
+Description: Description of turtlejoy
+Version: 0.0.0
+Cflags: -I/home/pi/ros/turtlejoy_ws/install/include
+Libs: -L/home/pi/ros/turtlejoy_ws/install/lib 
+Requires: 
