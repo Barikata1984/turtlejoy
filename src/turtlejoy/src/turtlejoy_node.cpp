@@ -6,12 +6,14 @@
 //	modified by Barikata1984
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #include <math.h>
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 #include <wiringPi.h>
 #include <vector>
+//#include "difinitions.h"
 //#include "motor_status.h"
 
 using namespace std;
@@ -52,14 +54,20 @@ void messageCallBack(const geometry_msgs::Twist& twist) {
 	left_rev	= (int)TICK * twist.linear.x;
 	right_rev	= (int)TICK * twist.angular.y;
 
-	ROS_INFO_STREAM("left revolution command: " << left_rev << ", right revolution command: " << right_rev);
+	ROS_INFO_STREAM("");
+	ROS_INFO_STREAM("");
+	ROS_INFO_STREAM("_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/");
+	ROS_INFO_STREAM("L-Rev-COMMAND: " << left_rev);
+	ROS_INFO_STREAM("R-Rev-COMMAND: " << right_rev);
+	ROS_INFO_STREAM("_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/");
+	ROS_INFO_STREAM("");
+	ROS_INFO_STREAM("");
 }
 
 // initialize gpio pins
 int init_gpio() {
-	if(wiringPiSetupGpio() == -1){
-		ROS_INFO_STREAM("Sorry, master. I couldn't initialize GPIOs.");
-	}
+	wiringPiSetupGpio();
+//	wiringPiSetupSys();
 
 	// set pi-node for the right motor
 	pinMode(R_1, OUTPUT);
@@ -74,7 +82,7 @@ int init_gpio() {
 	// set pwm 
 	pwmSetMode(PWM_MODE_MS);
 	pwmSetClock(400);
-	pwmSetRange(1024);
+	pwmSetRange(1023);
 }
 
 // drive motors
@@ -86,8 +94,6 @@ void drive_motors(vector<vector<vector<int> > >	&read_driver_pins){
 		pwmWrite(read_driver_pins[i][PIN_PWM][INDEX], read_driver_pins[i][PIN_PWM][VALUE]);
 	}			
 }
-//void drive_motors(vector<vector<vector<int> > >	&read_driver_pins){
-//void set_motor_config(vector<int> &read_motor_status){
 
 // main loop.
 int main(int argv, char **argc){
@@ -109,14 +115,15 @@ int main(int argv, char **argc){
 	//------------------------------------------
 	ROS_INFO_STREAM("Hi! me's the Turtlejoy!!");
 	//------------------------------------------
-	
+
 	init_gpio();
 	
 	//------------------------------------------
 	ROS_INFO_STREAM("GPIO initialized");
 	//------------------------------------------
 
-	ros::Subscriber sub = nh.subscribe("/joy0", 1000, &messageCallBack);  // generate the subscribre.
+	// genetate subscriber
+	ros::Subscriber sub = nh.subscribe("/joy0", 1000, &messageCallBack);
 	ros::Rate rate(FREQUENCY);		// set frequency.
  
 //	ROS_INFO_STREAM(x_pos);
@@ -137,35 +144,6 @@ int main(int argv, char **argc){
 			pwmWrite(R_PWM, 0);
 		}	
 			
-		if(left_rev > 128){
-			digitalWrite(L_1, 1);
-			digitalWrite(L_2, 0);
-			pwmWrite(L_PWM, abs(left_rev));
-		}else if(left_rev < -128){
-			digitalWrite(L_1, 0);
-			digitalWrite(L_2, 1);
-			pwmWrite(L_PWM, abs(left_rev));
-		}else{
-			digitalWrite(L_1, 0);
-			digitalWrite(L_2, 0);
-			pwmWrite(L_PWM, 0);
-		}
-//
-//	
-//		if(right_rev > 128){
-//			digitalWrite(R_1, 1);
-//			digitalWrite(R_2, 0);
-//			pwmWrite(R_PWM, abs(right_rev));
-//		}else if(right_rev < -128){
-//			digitalWrite(R_1, 0);
-//			digitalWrite(R_2, 1);
-//			pwmWrite(R_PWM, abs(right_rev));
-//		}else{
-//			digitalWrite(R_1, 0);
-//			digitalWrite(R_2, 0);
-//			pwmWrite(R_PWM, 0);
-//		}	
-//			
 //		if(left_rev > 128){
 //			digitalWrite(L_1, 1);
 //			digitalWrite(L_2, 0);
@@ -179,12 +157,27 @@ int main(int argv, char **argc){
 //			digitalWrite(L_2, 0);
 //			pwmWrite(L_PWM, 0);
 //		}
+
+//	
+//			digitalWrite(R_1, 1);
+//			digitalWrite(R_2, 0);
+//			pwmWrite(R_PWM, abs(right_rev));
+//			pwmWrite(R_PWM, 1023);
 //
 //		drive_motors(motos[0]);
 		ros::spinOnce();
 		rate.sleep();
 	}
+
+	pinMode(R_1, INPUT);
+	pinMode(R_2, INPUT);
+	pinMode(R_PWM, INPUT);
+
+	pinMode(L_1, OUTPUT);
+	pinMode(L_2, OUTPUT);
+	pinMode(L_PWM, PWM_OUTPUT);
+
+	ROS_INFO_STREAM("See you later, master.");	
+	return 0;
 }
-
-
 
