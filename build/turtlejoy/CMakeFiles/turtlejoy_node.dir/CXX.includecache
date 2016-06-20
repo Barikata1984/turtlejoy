@@ -9,9 +9,7 @@
 /home/pi/ros/turtlejoy_ws/src/turtlejoy/src/turtlejoy_node.cpp
 stdio.h
 -
-fcntl.h
--
-math.h
+stdlib.h
 -
 ros/ros.h
 -

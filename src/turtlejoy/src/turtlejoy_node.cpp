@@ -7,14 +7,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
-#include <math.h>
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 #include <wiringPi.h>
 #include <vector>
-//#include "difinitions.h"
-//#include "motor_status.h"
 
 using namespace std;
 
@@ -35,29 +31,60 @@ using namespace std;
 #define PIN_1	 0	// the pin set the revolution speed of the right motor
 #define PIN_2	 1	// the pin set the revolution speed of the right motor
 #define PIN_PWM	 2	// the pin set the revolution speed of the right motor
-#define INDEX	 0
-#define VALUE	 1
 
-//bool set;
-int left_rev;;
-int right_rev;
+int	right_rev;
+int	left_rev;
 
 class motor_status{
 private:
-	char		current_flag;
-	char		past_flag;
-	vector<int>	pin_num(3);
+	char			current_flag;
+	char			past_flag;
+	vector<char>	pin_num;
 public:
 	// constructor
-	motor_status::motor_status{
-		current_flag = 0;
-		past_flag = 0;
-		pin_num = {0, 0, 0};
-	}
+	motor_status(char pin_1, char pin_2, char pin_pwm);
+//	motor_status();
+	
+	void set_current_flag(int read_rev);
+	char get_current_flag(){return current_flag;};
 
-	// constructors with arguments
-	motor_status::motor_status(int P_1, int P_2, int P_PWM){
+	void set_past_flag(){past_flag = current_flag;};
+	char get_past_flag(){return past_flag;};
+
+	int check_flags();
 };
+
+motor_status::motor_status(char pin_1, char pin_2, char pin_pwm){
+//motor_status::motor_status(char pin_1, char pin_2, char pin_pwm) : pin_num(3){
+//motor_status::motor_status() : pin_num(3) {
+	current_flag = 0;
+	past_flag = 0;
+//	pin_num.push_back(pin_1);
+//	pin_num.push_back(pin_2);
+//	pin_num.push_back(pin_pwm);
+}
+
+void motor_status::set_current_flag(int read_rev){
+	if(read_rev==0){
+		current_flag = 0;
+	}else{
+		current_flag = (char)(read_rev / abs(read_rev));
+	}
+}
+
+int motor_status::check_flags(){
+	if(current_flag==past_flag){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+//motor_status::~motor_status(){
+//	if(pin_num!=NULL){
+//		delete pin_num;
+//	}
+//	ROS_INFO_STREAM("Destructor is called.");
+//}
 
 // callback function
 void messageCallBack(const geometry_msgs::Twist& twist);
@@ -70,14 +97,9 @@ int get_flag(int read_rev);
 
 // main loop.
 int main(int argv, char **argc){
-	vector<motor_status>	motors(2);
-	vector<vector<vector<int> > >	motor_status{
-		{		// the right motor
-			{R_1, 0}, {R_2, 0}, {R_PWM, 0},
-		}, {	//	the left motor
-			{L_1, 0}, {L_2, 0}, {L_PWM, 0},
-		}					
-	};
+	int R_current_flag;
+	int R_past_flag;
+	motor_status	motors(R_1,R_2,R_PWM);
 	left_rev = 0;
 	right_rev = 0;
 
