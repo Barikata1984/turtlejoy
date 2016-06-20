@@ -43,57 +43,30 @@ int left_rev;;
 int right_rev;
 
 class motor_status{
+private:
+	char		current_flag;
+	char		past_flag;
+	vector<int>	pin_num(3);
 public:
-	char	current_flag;
-	char	past_flag;
-	vector< vector<int> >	pins_status;
+	// constructor
+	motor_status::motor_status{
+		current_flag = 0;
+		past_flag = 0;
+		pin_num = {0, 0, 0};
+	}
+
+	// constructors with arguments
+	motor_status::motor_status(int P_1, int P_2, int P_PWM){
 };
 
 // callback function
-void messageCallBack(const geometry_msgs::Twist& twist) {
-	left_rev	= (int)TICK * twist.linear.x;
-	right_rev	= (int)TICK * twist.angular.y;
-
-	ROS_INFO_STREAM("");
-	ROS_INFO_STREAM("");
-	ROS_INFO_STREAM("_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/");
-	ROS_INFO_STREAM("L-Rev-COMMAND: " << left_rev);
-	ROS_INFO_STREAM("R-Rev-COMMAND: " << right_rev);
-	ROS_INFO_STREAM("_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/");
-	ROS_INFO_STREAM("");
-	ROS_INFO_STREAM("");
-}
+void messageCallBack(const geometry_msgs::Twist& twist);
 
 // initialize gpio pins
-int init_gpio() {
-	wiringPiSetupGpio();
-//	wiringPiSetupSys();
+int init_gpio();
 
-	// set pi-node for the right motor
-	pinMode(R_1, OUTPUT);
-	pinMode(R_2, OUTPUT);
-	pinMode(R_PWM, PWM_OUTPUT);
-	
-	// set pi-node for the left motor
-	pinMode(L_1, OUTPUT);
-	pinMode(L_2, OUTPUT);
-	pinMode(L_PWM, PWM_OUTPUT);
-
-	// set pwm 
-	pwmSetMode(PWM_MODE_MS);
-	pwmSetClock(400);
-	pwmSetRange(1023);
-}
-
-// drive motors
-void drive_motors(vector<vector<vector<int> > >	&read_driver_pins){
-	for(int i=0; i<2; i++){
-		for(int j=0; j<2; j++){
-			digitalWrite(read_driver_pins[i][j][INDEX], read_driver_pins[i][j][VALUE]);
-		}
-		pwmWrite(read_driver_pins[i][PIN_PWM][INDEX], read_driver_pins[i][PIN_PWM][VALUE]);
-	}			
-}
+// obtain revolution direction flag from pwm command
+int get_flag(int read_rev);
 
 // main loop.
 int main(int argv, char **argc){
@@ -107,7 +80,6 @@ int main(int argv, char **argc){
 	};
 	left_rev = 0;
 	right_rev = 0;
-//	set = false;
 
 	ros::init(argv, argc, "turtlereal3_node");
 	ros::NodeHandle nh;
@@ -126,24 +98,27 @@ int main(int argv, char **argc){
 	ros::Subscriber sub = nh.subscribe("/joy0", 1000, &messageCallBack);
 	ros::Rate rate(FREQUENCY);		// set frequency.
  
-//	ROS_INFO_STREAM(x_pos);
- 
  	// repeat till <C-c> is inputted.
 	while(ros::ok()){
-		if(right_rev > 128){
-			digitalWrite(R_1, 1);
-			digitalWrite(R_2, 0);
-			pwmWrite(R_PWM, abs(right_rev));
-		}else if(right_rev < -128){
-			digitalWrite(R_1, 0);
-			digitalWrite(R_2, 1);
-			pwmWrite(R_PWM, abs(right_rev));
-		}else{
-			digitalWrite(R_1, 0);
-			digitalWrite(R_2, 0);
-			pwmWrite(R_PWM, 0);
-		}	
-			
+		R_current_flag = get_flag(right_rev);
+		if(R_current_flag != R_past_flag){
+			switch(R_current_flag){
+			case -1:
+				digitalWrite(R_1, 0);
+				digitalWrite(R_2, 1);
+//				pwmWrite(R_PWM, abs(right_rev));
+			case 0:
+				digitalWrite(R_1, 0);
+				digitalWrite(R_2, 0);
+//				pwmWrite(R_PWM, abs(right_rev));
+			case 1:
+				digitalWrite(R_1, 1);
+				digitalWrite(R_2, 0);
+//				pwmWrite(R_PWM, 0);
+			}	
+		}
+		pwmWrite(R_PWM, abs(right_rev));
+		
 //		if(left_rev > 128){
 //			digitalWrite(L_1, 1);
 //			digitalWrite(L_2, 0);
@@ -158,13 +133,8 @@ int main(int argv, char **argc){
 //			pwmWrite(L_PWM, 0);
 //		}
 
-//	
-//			digitalWrite(R_1, 1);
-//			digitalWrite(R_2, 0);
-//			pwmWrite(R_PWM, abs(right_rev));
-//			pwmWrite(R_PWM, 1023);
-//
-//		drive_motors(motos[0]);
+		R_past_flag = R_current_flag;
+
 		ros::spinOnce();
 		rate.sleep();
 	}
@@ -180,4 +150,50 @@ int main(int argv, char **argc){
 	ROS_INFO_STREAM("See you later, master.");	
 	return 0;
 }
+
+// callback function
+void messageCallBack(const geometry_msgs::Twist& twist) {
+	left_rev	= (int)TICK * twist.linear.x;
+	right_rev	= (int)TICK * twist.angular.y;
+
+	ROS_INFO_STREAM("");
+	ROS_INFO_STREAM("");
+	ROS_INFO_STREAM("_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/");
+	ROS_INFO_STREAM("L-Rev-COMMAND: " << left_rev);
+	ROS_INFO_STREAM("R-Rev-COMMAND: " << right_rev);
+	ROS_INFO_STREAM("_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/");
+	ROS_INFO_STREAM("");
+	ROS_INFO_STREAM("");
+}
+
+int init_gpio() {
+	wiringPiSetupGpio();
+
+	// set pi-node for the right motor
+	pinMode(R_1, OUTPUT);
+	pinMode(R_2, OUTPUT);
+	pinMode(R_PWM, PWM_OUTPUT);
+	
+	// set pi-node for the left motor
+	pinMode(L_1, OUTPUT);
+	pinMode(L_2, OUTPUT);
+	pinMode(L_PWM, PWM_OUTPUT);
+
+	// set pwm 
+	pwmSetMode(PWM_MODE_MS);
+	pwmSetClock(400);
+	pwmSetRange(1023);
+}
+
+int get_flag(int read_rev){
+	if(read_rev==0){
+		return 0;
+	}else{
+		return read_rev / abs(read_rev);
+	}
+}
+
+
+
+
 
