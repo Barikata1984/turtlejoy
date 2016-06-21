@@ -5,6 +5,7 @@
 //	"http://forestofazumino.web.fc2.com/" and 
 //	modified by Barikata1984
 
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ros/ros.h>
@@ -14,7 +15,7 @@
 
 using namespace std;
 
-#define FREQUENCY	  20
+#define FREQUENCY	  30
 #define PERIOD		  20
 #define TICK		1024
 
@@ -37,38 +38,46 @@ int	left_rev;
 
 class motor_status{
 private:
-	char			current_flag;
-	char			past_flag;
+	int			current_flag;
+	int			past_flag;
 	vector<char>	pin_num;
+	int				rev;
 public:
 	// constructor
+	motor_status();
 	motor_status(char pin_1, char pin_2, char pin_pwm);
-//	motor_status();
 	
-	void set_current_flag(int read_rev);
-	char get_current_flag(){return current_flag;};
+	void set_current_flag(int read_rev);	// this function is defined below
+	int	get_current_flag(){return current_flag;};
 
 	void set_past_flag(){past_flag = current_flag;};
-	char get_past_flag(){return past_flag;};
+	int get_past_flag(){return past_flag;};
 
-	int check_flags();
+	int check_flags();	// this function is defined bellow
+
+	void set_rev(int read_command){rev = read_command;};
 };
 
-motor_status::motor_status(char pin_1, char pin_2, char pin_pwm){
-//motor_status::motor_status(char pin_1, char pin_2, char pin_pwm) : pin_num(3){
-//motor_status::motor_status() : pin_num(3) {
+motor_status::motor_status(){
+//motor_status::motor_status() : pin_num(3, {0, 0, 0}){
 	current_flag = 0;
 	past_flag = 0;
-//	pin_num.push_back(pin_1);
-//	pin_num.push_back(pin_2);
-//	pin_num.push_back(pin_pwm);
+	pin_num = {0, 0, 0};
+	rev = 0;
+}
+
+motor_status::motor_status(char pin_1, char pin_2, char pin_pwm){
+	current_flag = 0;
+	past_flag = 0;
+	pin_num = {pin_1, pin_2, pin_pwm};
+	rev = 0;
 }
 
 void motor_status::set_current_flag(int read_rev){
 	if(read_rev==0){
-		current_flag = 0;
+		current_flag = 1;
 	}else{
-		current_flag = (char)(read_rev / abs(read_rev));
+		current_flag = ((read_rev / abs(read_rev)) + 1);
 	}
 }
 
@@ -79,27 +88,36 @@ int motor_status::check_flags(){
 		return 0;
 	}
 }
-//motor_status::~motor_status(){
-//	if(pin_num!=NULL){
-//		delete pin_num;
-//	}
-//	ROS_INFO_STREAM("Destructor is called.");
-//}
+
+//		R_current_flag = get_flag(right_rev);
+//		if(R_current_flag != R_past_flag){
+//			switch(R_current_flag){
+//			case -1:
+//				digitalWrite(R_1, 0);
+//				digitalWrite(R_2, 1);
+//			case 0:
+//				digitalWrite(R_1, 0);
+//				digitalWrite(R_2, 0);
+//			case 1:
+//				digitalWrite(R_1, 1);
+//				digitalWrite(R_2, 0);
+//			}	
+//		}
+//		pwmWrite(R_PWM, abs(right_rev));
+//		
+//		R_past_flag = R_current_flag;
+
 
 // callback function
-void messageCallBack(const geometry_msgs::Twist& twist);
+//void messageCallBack(const geometry_msgs::Twist &twist, vector<motor_status> &read_motors);
+void messageCallBack(const geometry_msgs::Twist &twis);
 
 // initialize gpio pins
 int init_gpio();
 
-// obtain revolution direction flag from pwm command
-int get_flag(int read_rev);
-
 // main loop.
 int main(int argv, char **argc){
-	int R_current_flag;
-	int R_past_flag;
-	motor_status	motors(R_1,R_2,R_PWM);
+	vector<motor_status>	motors{motor_status(R_1, R_2, R_PWM), motor_status(L_1, L_2, L_PWM)};
 	left_rev = 0;
 	right_rev = 0;
 
@@ -117,26 +135,32 @@ int main(int argv, char **argc){
 	//------------------------------------------
 
 	// genetate subscriber
-	ros::Subscriber sub = nh.subscribe("/joy0", 1000, &messageCallBack);
+//	ros::Subscriber sub = nh.subscribe<geometry_msgs::Twist>("/joy0", 1000, boost::bind(messageCallBack, _1, &motors));
+	ros::Subscriber sub = nh.subscribe("/joy0", 1000, messageCallBack);
 	ros::Rate rate(FREQUENCY);		// set frequency.
  
  	// repeat till <C-c> is inputted.
 	while(ros::ok()){
-		R_current_flag = get_flag(right_rev);
-		if(R_current_flag != R_past_flag){
-			switch(R_current_flag){
-			case -1:
-				digitalWrite(R_1, 0);
-				digitalWrite(R_2, 1);
-//				pwmWrite(R_PWM, abs(right_rev));
+		motors[RIGHT].set_current_flag(right_rev);
+//		right_flag = motors[RIGHT].get_current_flag();
+		cout << "right_flag is" << motors[RIGHT].get_current_flag() << endl;
+		if(motors[RIGHT].check_flags()){
+			switch(motors[RIGHT].get_current_flag()){
 			case 0:
 				digitalWrite(R_1, 0);
-				digitalWrite(R_2, 0);
-//				pwmWrite(R_PWM, abs(right_rev));
+				digitalWrite(R_2, 1);
+				break;
+				ROS_INFO_STREAM("Hi!");
 			case 1:
+				digitalWrite(R_1, 0);
+				digitalWrite(R_2, 0);
+				break;
+				ROS_INFO_STREAM("It's!!");
+			case 2:
 				digitalWrite(R_1, 1);
 				digitalWrite(R_2, 0);
-//				pwmWrite(R_PWM, 0);
+				break;
+				ROS_INFO_STREAM("Me!!!");
 			}	
 		}
 		pwmWrite(R_PWM, abs(right_rev));
@@ -155,8 +179,8 @@ int main(int argv, char **argc){
 //			pwmWrite(L_PWM, 0);
 //		}
 
-		R_past_flag = R_current_flag;
-
+		motors[RIGHT].set_past_flag();
+		
 		ros::spinOnce();
 		rate.sleep();
 	}
@@ -178,14 +202,10 @@ void messageCallBack(const geometry_msgs::Twist& twist) {
 	left_rev	= (int)TICK * twist.linear.x;
 	right_rev	= (int)TICK * twist.angular.y;
 
-	ROS_INFO_STREAM("");
-	ROS_INFO_STREAM("");
-	ROS_INFO_STREAM("_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/");
-	ROS_INFO_STREAM("L-Rev-COMMAND: " << left_rev);
-	ROS_INFO_STREAM("R-Rev-COMMAND: " << right_rev);
-	ROS_INFO_STREAM("_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/");
-	ROS_INFO_STREAM("");
-	ROS_INFO_STREAM("");
+//	ROS_INFO_STREAM("_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/");
+//	ROS_INFO_STREAM("L-Rev-COMMAND: " << left_rev);
+//	ROS_INFO_STREAM("R-Rev-COMMAND: " << right_rev);
+//	ROS_INFO_STREAM("");
 }
 
 int init_gpio() {
@@ -206,16 +226,4 @@ int init_gpio() {
 	pwmSetClock(400);
 	pwmSetRange(1023);
 }
-
-int get_flag(int read_rev){
-	if(read_rev==0){
-		return 0;
-	}else{
-		return read_rev / abs(read_rev);
-	}
-}
-
-
-
-
 
