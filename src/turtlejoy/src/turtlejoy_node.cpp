@@ -56,6 +56,8 @@ public:
 	int check_flags();	// this function is defined bellow
 
 	void set_rev(int read_command){rev = read_command;};
+
+	void driver();
 };
 
 motor_status::motor_status(){
@@ -89,27 +91,34 @@ int motor_status::check_flags(){
 	}
 }
 
-//		R_current_flag = get_flag(right_rev);
-//		if(R_current_flag != R_past_flag){
-//			switch(R_current_flag){
-//			case -1:
-//				digitalWrite(R_1, 0);
-//				digitalWrite(R_2, 1);
-//			case 0:
-//				digitalWrite(R_1, 0);
-//				digitalWrite(R_2, 0);
-//			case 1:
-//				digitalWrite(R_1, 1);
-//				digitalWrite(R_2, 0);
-//			}	
-//		}
-//		pwmWrite(R_PWM, abs(right_rev));
-//		
-//		R_past_flag = R_current_flag;
-
+void motor_status::driver(int command){
+	set_rev(command);
+	set_current_flag(rev);
+	if(check_flags()){
+		switch(get_current_flag()){
+		case 0:
+			digitalWrite(pin_num[PIN_1], 0);
+			digitalWrite(pin_num[PIN_2], 1);
+			break;
+//			ROS_INFO_STREAM("Hi!");
+		case 1:
+			digitalWrite(pin_num[PIN_1], 0);
+			digitalWrite(pin_num[PIN_2], 0);
+			break;
+//			ROS_INFO_STREAM("It's!!");
+		case 2:
+			digitalWrite(pin_num[PIN_1], 1);
+			digitalWrite(pin_num[PIN_2], 0);
+			break;
+//			ROS_INFO_STREAM("Me!!!");
+		}	
+	}
+	pwmWrite(PIN_PWM, abs(rev));
+	set_past_flag();
+}
 
 // callback function
-//void messageCallBack(const geometry_msgs::Twist &twist, vector<motor_status> &read_motors);
+//void messageCallBack(const geometry_msgs::Twist &twist, vector<int> &write_commands);
 void messageCallBack(const geometry_msgs::Twist &twis);
 
 // initialize gpio pins
@@ -117,11 +126,15 @@ int init_gpio();
 
 // main loop.
 int main(int argv, char **argc){
-	vector<motor_status>	motors{motor_status(R_1, R_2, R_PWM), motor_status(L_1, L_2, L_PWM)};
+	vector<int>	joy_commands(2, 0);
+	vector<motor_status>	motors{
+								motor_status(R_1, R_2, R_PWM),
+								motor_status(L_1, L_2, L_PWM),
+							};
 	left_rev = 0;
 	right_rev = 0;
 
-	ros::init(argv, argc, "turtlereal3_node");
+	ros::init(argv, argc, "turtlejoy_node");
 	ros::NodeHandle nh;
 	
 	//------------------------------------------
@@ -135,14 +148,13 @@ int main(int argv, char **argc){
 	//------------------------------------------
 
 	// genetate subscriber
-//	ros::Subscriber sub = nh.subscribe<geometry_msgs::Twist>("/joy0", 1000, boost::bind(messageCallBack, _1, &motors));
+//	ros::Subscriber sub = nh.subscribe<geometry_msgs::Twist>("/joy0", 1000, boost::bind(messageCallBack, _1, &joy_commands));
 	ros::Subscriber sub = nh.subscribe("/joy0", 1000, messageCallBack);
 	ros::Rate rate(FREQUENCY);		// set frequency.
  
  	// repeat till <C-c> is inputted.
 	while(ros::ok()){
 		motors[RIGHT].set_current_flag(right_rev);
-//		right_flag = motors[RIGHT].get_current_flag();
 		cout << "right_flag is" << motors[RIGHT].get_current_flag() << endl;
 		if(motors[RIGHT].check_flags()){
 			switch(motors[RIGHT].get_current_flag()){
@@ -189,16 +201,16 @@ int main(int argv, char **argc){
 	pinMode(R_2, INPUT);
 	pinMode(R_PWM, INPUT);
 
-	pinMode(L_1, OUTPUT);
-	pinMode(L_2, OUTPUT);
-	pinMode(L_PWM, PWM_OUTPUT);
+	pinMode(L_1, INPUT);
+	pinMode(L_2, INPUT);
+	pinMode(L_PWM, INPUT);
 
 	ROS_INFO_STREAM("See you later, master.");	
 	return 0;
 }
 
 // callback function
-void messageCallBack(const geometry_msgs::Twist& twist) {
+void messageCallBack(const geometry_msgs::Twist &twist) {
 	left_rev	= (int)TICK * twist.linear.x;
 	right_rev	= (int)TICK * twist.angular.y;
 
