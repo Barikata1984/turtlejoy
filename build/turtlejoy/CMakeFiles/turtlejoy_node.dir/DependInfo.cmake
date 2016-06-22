@@ -4,6 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
+  "/home/pi/ros/turtlejoy_ws/src/turtlejoy/src/motor_status.cpp" "/home/pi/ros/turtlejoy_ws/build/turtlejoy/CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.o"
   "/home/pi/ros/turtlejoy_ws/src/turtlejoy/src/turtlejoy_node.cpp" "/home/pi/ros/turtlejoy_ws/build/turtlejoy/CMakeFiles/turtlejoy_node.dir/src/turtlejoy_node.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")

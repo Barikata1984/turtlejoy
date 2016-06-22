@@ -134,7 +134,11 @@ add_dependencies(
 )
 
 ## Declare a C++ executable
-add_executable(turtlejoy_node src/turtlejoy_node.cpp)
+add_executable(
+	turtlejoy_node
+	src/motor_status.cpp
+	src/turtlejoy_node.cpp
+)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above

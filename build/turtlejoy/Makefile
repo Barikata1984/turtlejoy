@@ -335,6 +335,30 @@ turtlejoy_node/fast:
 	cd /home/pi/ros/turtlejoy_ws/build && $(MAKE) -f turtlejoy/CMakeFiles/turtlejoy_node.dir/build.make turtlejoy/CMakeFiles/turtlejoy_node.dir/build
 .PHONY : turtlejoy_node/fast
 
+src/motor_status.o: src/motor_status.cpp.o
+.PHONY : src/motor_status.o
+
+# target to build an object file
+src/motor_status.cpp.o:
+	cd /home/pi/ros/turtlejoy_ws/build && $(MAKE) -f turtlejoy/CMakeFiles/turtlejoy_node.dir/build.make turtlejoy/CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.o
+.PHONY : src/motor_status.cpp.o
+
+src/motor_status.i: src/motor_status.cpp.i
+.PHONY : src/motor_status.i
+
+# target to preprocess a source file
+src/motor_status.cpp.i:
+	cd /home/pi/ros/turtlejoy_ws/build && $(MAKE) -f turtlejoy/CMakeFiles/turtlejoy_node.dir/build.make turtlejoy/CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.i
+.PHONY : src/motor_status.cpp.i
+
+src/motor_status.s: src/motor_status.cpp.s
+.PHONY : src/motor_status.s
+
+# target to generate assembly for a file
+src/motor_status.cpp.s:
+	cd /home/pi/ros/turtlejoy_ws/build && $(MAKE) -f turtlejoy/CMakeFiles/turtlejoy_node.dir/build.make turtlejoy/CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.s
+.PHONY : src/motor_status.cpp.s
+
 src/turtlejoy_node.o: src/turtlejoy_node.cpp.o
 .PHONY : src/turtlejoy_node.o
 
@@ -385,6 +409,9 @@ help:
 	@echo "... std_msgs_generate_messages_py"
 	@echo "... test"
 	@echo "... turtlejoy_node"
+	@echo "... src/motor_status.o"
+	@echo "... src/motor_status.i"
+	@echo "... src/motor_status.s"
 	@echo "... src/turtlejoy_node.o"
 	@echo "... src/turtlejoy_node.i"
 	@echo "... src/turtlejoy_node.s"

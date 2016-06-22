@@ -5,134 +5,38 @@
 //	"http://forestofazumino.web.fc2.com/" and 
 //	modified by Barikata1984
 
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 #include <wiringPi.h>
 #include <vector>
+#include "definitions.h"
+#include "motor_status.h"
 
 using namespace std;
 
-#define FREQUENCY	  30
-#define PERIOD		  20
-#define TICK		1024
+//int	right_rev;
+//int	left_rev;
 
-// define gpio pins to control motors
-#define	R_1		11
-#define	R_2		 9
-#define R_PWM	12	// the pin set the revolution speed of the right motor
-#define L_1		22
-#define L_2		27
-#define L_PWM	18	// the pin set the revolution speed of the left motor
-
-#define	RIGHT	 0
-#define	LEFT	 1
-#define PIN_1	 0	// the pin set the revolution speed of the right motor
-#define PIN_2	 1	// the pin set the revolution speed of the right motor
-#define PIN_PWM	 2	// the pin set the revolution speed of the right motor
-
-int	right_rev;
-int	left_rev;
-
-class motor_status{
-private:
-	int			current_flag;
-	int			past_flag;
-	vector<char>	pin_num;
-	int				rev;
-public:
-	// constructor
-	motor_status();
-	motor_status(char pin_1, char pin_2, char pin_pwm);
-	
-	void set_current_flag(int read_rev);	// this function is defined below
-	int	get_current_flag(){return current_flag;};
-
-	void set_past_flag(){past_flag = current_flag;};
-	int get_past_flag(){return past_flag;};
-
-	int check_flags();	// this function is defined bellow
-
-	void set_rev(int read_command){rev = read_command;};
-
-	void driver();
-};
-
-motor_status::motor_status(){
-//motor_status::motor_status() : pin_num(3, {0, 0, 0}){
-	current_flag = 0;
-	past_flag = 0;
-	pin_num = {0, 0, 0};
-	rev = 0;
-}
-
-motor_status::motor_status(char pin_1, char pin_2, char pin_pwm){
-	current_flag = 0;
-	past_flag = 0;
-	pin_num = {pin_1, pin_2, pin_pwm};
-	rev = 0;
-}
-
-void motor_status::set_current_flag(int read_rev){
-	if(read_rev==0){
-		current_flag = 1;
-	}else{
-		current_flag = ((read_rev / abs(read_rev)) + 1);
-	}
-}
-
-int motor_status::check_flags(){
-	if(current_flag==past_flag){
-		return 1;
-	}else{
-		return 0;
-	}
-}
-
-void motor_status::driver(int command){
-	set_rev(command);
-	set_current_flag(rev);
-	if(check_flags()){
-		switch(get_current_flag()){
-		case 0:
-			digitalWrite(pin_num[PIN_1], 0);
-			digitalWrite(pin_num[PIN_2], 1);
-			break;
-//			ROS_INFO_STREAM("Hi!");
-		case 1:
-			digitalWrite(pin_num[PIN_1], 0);
-			digitalWrite(pin_num[PIN_2], 0);
-			break;
-//			ROS_INFO_STREAM("It's!!");
-		case 2:
-			digitalWrite(pin_num[PIN_1], 1);
-			digitalWrite(pin_num[PIN_2], 0);
-			break;
-//			ROS_INFO_STREAM("Me!!!");
-		}	
-	}
-	pwmWrite(PIN_PWM, abs(rev));
-	set_past_flag();
-}
+vector<int>	joy_commands(2, 0);
 
 // callback function
-//void messageCallBack(const geometry_msgs::Twist &twist, vector<int> &write_commands);
+//void messageCallBack(const geometry_msgs::Twist &twist, vector<int>::iterator write_commands);
 void messageCallBack(const geometry_msgs::Twist &twis);
 
-// initialize gpio pins
-int init_gpio();
+// handle gpio pins
+int initialize_gpio(vector<motor_status> &read_motors);
+int terminate_gpio(vector<motor_status> &read_motors);
 
 // main loop.
 int main(int argv, char **argc){
-	vector<int>	joy_commands(2, 0);
 	vector<motor_status>	motors{
 								motor_status(R_1, R_2, R_PWM),
 								motor_status(L_1, L_2, L_PWM),
 							};
-	left_rev = 0;
-	right_rev = 0;
+//	vector<int>	joy_commands(2, 0);
+	
+//	left_rev = 0;
+//	right_rev = 0;
 
 	ros::init(argv, argc, "turtlejoy_node");
 	ros::NodeHandle nh;
@@ -141,69 +45,77 @@ int main(int argv, char **argc){
 	ROS_INFO_STREAM("Hi! me's the Turtlejoy!!");
 	//------------------------------------------
 
-	init_gpio();
+	initialize_gpio(motors);
 	
 	//------------------------------------------
 	ROS_INFO_STREAM("GPIO initialized");
 	//------------------------------------------
 
 	// genetate subscriber
-//	ros::Subscriber sub = nh.subscribe<geometry_msgs::Twist>("/joy0", 1000, boost::bind(messageCallBack, _1, &joy_commands));
-	ros::Subscriber sub = nh.subscribe("/joy0", 1000, messageCallBack);
+//	ros::Subscriber sub = nh.subscribe<geometry_msgs::Twist>("/joy0", 100, boost::bind(messageCallBack, _1, &joy_commands));
+	ros::Subscriber sub = nh.subscribe("/joy0", 100, messageCallBack);
 	ros::Rate rate(FREQUENCY);		// set frequency.
  
  	// repeat till <C-c> is inputted.
 	while(ros::ok()){
-		motors[RIGHT].set_current_flag(right_rev);
-		cout << "right_flag is" << motors[RIGHT].get_current_flag() << endl;
-		if(motors[RIGHT].check_flags()){
-			switch(motors[RIGHT].get_current_flag()){
-			case 0:
-				digitalWrite(R_1, 0);
-				digitalWrite(R_2, 1);
-				break;
-				ROS_INFO_STREAM("Hi!");
-			case 1:
-				digitalWrite(R_1, 0);
-				digitalWrite(R_2, 0);
-				break;
-				ROS_INFO_STREAM("It's!!");
-			case 2:
-				digitalWrite(R_1, 1);
-				digitalWrite(R_2, 0);
-				break;
-				ROS_INFO_STREAM("Me!!!");
-			}	
-		}
-		pwmWrite(R_PWM, abs(right_rev));
-		
-//		if(left_rev > 128){
-//			digitalWrite(L_1, 1);
-//			digitalWrite(L_2, 0);
-//			pwmWrite(L_PWM, abs(left_rev));
-//		}else if(left_rev < -128){
-//			digitalWrite(L_1, 0);
-//			digitalWrite(L_2, 1);
-//			pwmWrite(L_PWM, abs(left_rev));
-//		}else{
-//			digitalWrite(L_1, 0);
-//			digitalWrite(L_2, 0);
-//			pwmWrite(L_PWM, 0);
-//		}
+		ROS_INFO_STREAM("_/_/_/_/_/_/_/_/_/_/_/_/");
+		for(int i; i<joy_commands.size(); i++){
+			motors[i].set_current_flag(joy_commands[i]);
 
-		motors[RIGHT].set_past_flag();
+			switch(i){
+			case 0:
+				ROS_INFO_STREAM("Right: " << motors[i].get_rev());
+				break;
+			case 1:
+				ROS_INFO_STREAM("Left : " << motors[i].get_rev());
+				break;
+			}
+		}
+
+//		motors[RIGHT].set_current_flag(right_rev);
+//		cout << "right_flag is" << motors[RIGHT].get_current_flag() << endl;
+//		if(motors[RIGHT].check_flags()){
+//			switch(motors[RIGHT].get_current_flag()){
+//			case 0:
+//				digitalWrite(R_1, 0);
+//				digitalWrite(R_2, 1);
+//				break;
+//				ROS_INFO_STREAM("Hi!");
+//			case 1:
+//				digitalWrite(R_1, 0);
+//				digitalWrite(R_2, 0);
+//				break;
+//				ROS_INFO_STREAM("It's!!");
+//			case 2:
+//				digitalWrite(R_1, 1);
+//				digitalWrite(R_2, 0);
+//				break;
+//				ROS_INFO_STREAM("Me!!!");
+//			}	
+//		}
+//		pwmWrite(R_PWM, abs(right_rev));
+//		
+////		if(left_rev > 128){
+////			digitalWrite(L_1, 1);
+////			digitalWrite(L_2, 0);
+////			pwmWrite(L_PWM, abs(left_rev));
+////		}else if(left_rev < -128){
+////			digitalWrite(L_1, 0);
+////			digitalWrite(L_2, 1);
+////			pwmWrite(L_PWM, abs(left_rev));
+////		}else{
+////			digitalWrite(L_1, 0);
+////			digitalWrite(L_2, 0);
+////			pwmWrite(L_PWM, 0);
+////		}
+//
+//		motors[RIGHT].set_past_flag();
 		
 		ros::spinOnce();
 		rate.sleep();
 	}
 
-	pinMode(R_1, INPUT);
-	pinMode(R_2, INPUT);
-	pinMode(R_PWM, INPUT);
-
-	pinMode(L_1, INPUT);
-	pinMode(L_2, INPUT);
-	pinMode(L_PWM, INPUT);
+	terminate_gpio(motors);
 
 	ROS_INFO_STREAM("See you later, master.");	
 	return 0;
@@ -211,27 +123,30 @@ int main(int argv, char **argc){
 
 // callback function
 void messageCallBack(const geometry_msgs::Twist &twist) {
-	left_rev	= (int)TICK * twist.linear.x;
-	right_rev	= (int)TICK * twist.angular.y;
+//void messageCallBack(const geometry_msgs::Twist &twist, vector<int>::iterator write_command){
+	joy_commands[RIGHT]	= (int)TICK * twist.angular.y;
+	joy_commands[LEFT]	= (int)TICK * twist.linear.x;
 
 //	ROS_INFO_STREAM("_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/");
-//	ROS_INFO_STREAM("L-Rev-COMMAND: " << left_rev);
-//	ROS_INFO_STREAM("R-Rev-COMMAND: " << right_rev);
+//	ROS_INFO_STREAM("R-Rev-COMMAND: " << motors[RIGHT].get_rev());
+//	ROS_INFO_STREAM("L-Rev-COMMAND: " << motors[LEFT].get_rev());
 //	ROS_INFO_STREAM("");
 }
 
-int init_gpio() {
+int initialize_gpio(vector<motor_status> &read_motors) {
 	wiringPiSetupGpio();
 
-	// set pi-node for the right motor
-	pinMode(R_1, OUTPUT);
-	pinMode(R_2, OUTPUT);
-	pinMode(R_PWM, PWM_OUTPUT);
-	
+	for(int i; i<read_motors.size(); i++){
+		// set pi-node for the right motor
+		pinMode(read_motors[i].get_pin_num[PIN_1], OUTPUT);
+		pinMode(read_motors[i].get_pin_num[PIN_2], OUTPUT);
+		pinMode(read_motors[i].get_pin_num[R_PWM], PWM_OUTPUT);
+	}
+
 	// set pi-node for the left motor
-	pinMode(L_1, OUTPUT);
-	pinMode(L_2, OUTPUT);
-	pinMode(L_PWM, PWM_OUTPUT);
+//	pinMode(L_1, OUTPUT);
+//	pinMode(L_2, OUTPUT);
+//	pinMode(L_PWM, PWM_OUTPUT);
 
 	// set pwm 
 	pwmSetMode(PWM_MODE_MS);
@@ -239,3 +154,18 @@ int init_gpio() {
 	pwmSetRange(1023);
 }
 
+int terminate_gpio(vector<motor_status> &read_motors) {
+	for(int i; i<read_motors.size(); i++){
+		// set pi-node for the right motor
+		pinMode(read_motors[i].get_pin_num[PIN_1], OUTPUT);
+		pinMode(read_motors[i].get_pin_num[PIN_2], OUTPUT);
+		pinMode(read_motors[i].get_pin_num[R_PWM], PWM_OUTPUT);
+	}
+//	pinMode(R_1, INPUT);
+//	pinMode(R_2, INPUT);
+//	pinMode(R_PWM, INPUT);
+
+//	pinMode(L_1, INPUT);
+//	pinMode(L_2, INPUT);
+//	pinMode(L_PWM, INPUT);
+}

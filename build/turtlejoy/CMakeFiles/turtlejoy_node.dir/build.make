@@ -49,9 +49,32 @@ include turtlejoy/CMakeFiles/turtlejoy_node.dir/progress.make
 # Include the compile flags for this target's objects.
 include turtlejoy/CMakeFiles/turtlejoy_node.dir/flags.make
 
+turtlejoy/CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.o: turtlejoy/CMakeFiles/turtlejoy_node.dir/flags.make
+turtlejoy/CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.o: /home/pi/ros/turtlejoy_ws/src/turtlejoy/src/motor_status.cpp
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/ros/turtlejoy_ws/build/CMakeFiles $(CMAKE_PROGRESS_1)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object turtlejoy/CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.o"
+	cd /home/pi/ros/turtlejoy_ws/build/turtlejoy && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.o -c /home/pi/ros/turtlejoy_ws/src/turtlejoy/src/motor_status.cpp
+
+turtlejoy/CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.i"
+	cd /home/pi/ros/turtlejoy_ws/build/turtlejoy && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pi/ros/turtlejoy_ws/src/turtlejoy/src/motor_status.cpp > CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.i
+
+turtlejoy/CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.s"
+	cd /home/pi/ros/turtlejoy_ws/build/turtlejoy && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pi/ros/turtlejoy_ws/src/turtlejoy/src/motor_status.cpp -o CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.s
+
+turtlejoy/CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.o.requires:
+.PHONY : turtlejoy/CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.o.requires
+
+turtlejoy/CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.o.provides: turtlejoy/CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.o.requires
+	$(MAKE) -f turtlejoy/CMakeFiles/turtlejoy_node.dir/build.make turtlejoy/CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.o.provides.build
+.PHONY : turtlejoy/CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.o.provides
+
+turtlejoy/CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.o.provides.build: turtlejoy/CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.o
+
 turtlejoy/CMakeFiles/turtlejoy_node.dir/src/turtlejoy_node.cpp.o: turtlejoy/CMakeFiles/turtlejoy_node.dir/flags.make
 turtlejoy/CMakeFiles/turtlejoy_node.dir/src/turtlejoy_node.cpp.o: /home/pi/ros/turtlejoy_ws/src/turtlejoy/src/turtlejoy_node.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/ros/turtlejoy_ws/build/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/pi/ros/turtlejoy_ws/build/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object turtlejoy/CMakeFiles/turtlejoy_node.dir/src/turtlejoy_node.cpp.o"
 	cd /home/pi/ros/turtlejoy_ws/build/turtlejoy && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/turtlejoy_node.dir/src/turtlejoy_node.cpp.o -c /home/pi/ros/turtlejoy_ws/src/turtlejoy/src/turtlejoy_node.cpp
 
@@ -74,11 +97,13 @@ turtlejoy/CMakeFiles/turtlejoy_node.dir/src/turtlejoy_node.cpp.o.provides.build:
 
 # Object files for target turtlejoy_node
 turtlejoy_node_OBJECTS = \
+"CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.o" \
 "CMakeFiles/turtlejoy_node.dir/src/turtlejoy_node.cpp.o"
 
 # External object files for target turtlejoy_node
 turtlejoy_node_EXTERNAL_OBJECTS =
 
+/home/pi/ros/turtlejoy_ws/devel/lib/turtlejoy/turtlejoy_node: turtlejoy/CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.o
 /home/pi/ros/turtlejoy_ws/devel/lib/turtlejoy/turtlejoy_node: turtlejoy/CMakeFiles/turtlejoy_node.dir/src/turtlejoy_node.cpp.o
 /home/pi/ros/turtlejoy_ws/devel/lib/turtlejoy/turtlejoy_node: turtlejoy/CMakeFiles/turtlejoy_node.dir/build.make
 /home/pi/ros/turtlejoy_ws/devel/lib/turtlejoy/turtlejoy_node: /opt/ros/indigo/lib/libroscpp.so
@@ -107,6 +132,7 @@ turtlejoy_node_EXTERNAL_OBJECTS =
 turtlejoy/CMakeFiles/turtlejoy_node.dir/build: /home/pi/ros/turtlejoy_ws/devel/lib/turtlejoy/turtlejoy_node
 .PHONY : turtlejoy/CMakeFiles/turtlejoy_node.dir/build
 
+turtlejoy/CMakeFiles/turtlejoy_node.dir/requires: turtlejoy/CMakeFiles/turtlejoy_node.dir/src/motor_status.cpp.o.requires
 turtlejoy/CMakeFiles/turtlejoy_node.dir/requires: turtlejoy/CMakeFiles/turtlejoy_node.dir/src/turtlejoy_node.cpp.o.requires
 .PHONY : turtlejoy/CMakeFiles/turtlejoy_node.dir/requires
 

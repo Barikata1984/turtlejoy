@@ -6,13 +6,27 @@
 
 #IncludeRegexTransform: 
 
-/home/pi/ros/turtlejoy_ws/src/turtlejoy/src/turtlejoy_node.cpp
-iostream
+/home/pi/ros/turtlejoy_ws/src/turtlejoy/include/definitions.h
+
+/home/pi/ros/turtlejoy_ws/src/turtlejoy/include/motor_status.h
+wiringPi.h
 -
-stdio.h
+vector
+-
+definitions.h
+/home/pi/ros/turtlejoy_ws/src/turtlejoy/include/definitions.h
+
+/home/pi/ros/turtlejoy_ws/src/turtlejoy/src/motor_status.cpp
+wiringPi.h
 -
 stdlib.h
 -
+vector
+-
+motor_status.h
+/home/pi/ros/turtlejoy_ws/src/turtlejoy/src/motor_status.h
+
+/home/pi/ros/turtlejoy_ws/src/turtlejoy/src/turtlejoy_node.cpp
 ros/ros.h
 -
 geometry_msgs/Twist.h
@@ -21,6 +35,10 @@ wiringPi.h
 -
 vector
 -
+definitions.h
+/home/pi/ros/turtlejoy_ws/src/turtlejoy/src/definitions.h
+motor_status.h
+/home/pi/ros/turtlejoy_ws/src/turtlejoy/src/motor_status.h
 
 /opt/ros/indigo/include/XmlRpcDecl.h
 ros/macros.h
