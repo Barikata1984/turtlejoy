@@ -42,8 +42,8 @@ int motor_status::check_flags(){
 	}
 }
 
-void motor_status::driver(int command){
-	set_rev(command);
+void motor_status::driver(int write_command){
+	set_rev(write_command);
 	set_current_flag(rev);
 	if(check_flags()){
 		switch(get_current_flag()){

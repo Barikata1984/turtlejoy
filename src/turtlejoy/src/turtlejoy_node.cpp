@@ -14,9 +14,6 @@
 
 using namespace std;
 
-//int	right_rev;
-//int	left_rev;
-
 vector<int>	joy_commands(2, 0);
 
 // callback function
@@ -35,9 +32,6 @@ int main(int argv, char **argc){
 							};
 //	vector<int>	joy_commands(2, 0);
 	
-//	left_rev = 0;
-//	right_rev = 0;
-
 	ros::init(argv, argc, "turtlejoy_node");
 	ros::NodeHandle nh;
 	
@@ -60,7 +54,7 @@ int main(int argv, char **argc){
 	while(ros::ok()){
 		ROS_INFO_STREAM("_/_/_/_/_/_/_/_/_/_/_/_/");
 		for(int i; i<joy_commands.size(); i++){
-			motors[i].set_current_flag(joy_commands[i]);
+			motors[i].driver(joy_commands[i]);
 
 			switch(i){
 			case 0:
@@ -68,6 +62,7 @@ int main(int argv, char **argc){
 				break;
 			case 1:
 				ROS_INFO_STREAM("Left : " << motors[i].get_rev());
+				ROS_INFO_STREAM("");
 				break;
 			}
 		}
@@ -76,8 +71,7 @@ int main(int argv, char **argc){
 //		cout << "right_flag is" << motors[RIGHT].get_current_flag() << endl;
 //		if(motors[RIGHT].check_flags()){
 //			switch(motors[RIGHT].get_current_flag()){
-//			case 0:
-//				digitalWrite(R_1, 0);
+//			case 0: //				digitalWrite(R_1, 0);
 //				digitalWrite(R_2, 1);
 //				break;
 //				ROS_INFO_STREAM("Hi!");
@@ -138,9 +132,9 @@ int initialize_gpio(vector<motor_status> &read_motors) {
 
 	for(int i; i<read_motors.size(); i++){
 		// set pi-node for the right motor
-		pinMode(read_motors[i].get_pin_num[PIN_1], OUTPUT);
-		pinMode(read_motors[i].get_pin_num[PIN_2], OUTPUT);
-		pinMode(read_motors[i].get_pin_num[R_PWM], PWM_OUTPUT);
+		pinMode(read_motors[i].get_pin_num(PIN_1), OUTPUT);
+		pinMode(read_motors[i].get_pin_num(PIN_2), OUTPUT);
+		pinMode(read_motors[i].get_pin_num(PIN_PWM), PWM_OUTPUT);
 	}
 
 	// set pi-node for the left motor
@@ -151,15 +145,15 @@ int initialize_gpio(vector<motor_status> &read_motors) {
 	// set pwm 
 	pwmSetMode(PWM_MODE_MS);
 	pwmSetClock(400);
-	pwmSetRange(1023);
+	pwmSetRange(PWM_CLOCK);
 }
 
 int terminate_gpio(vector<motor_status> &read_motors) {
 	for(int i; i<read_motors.size(); i++){
 		// set pi-node for the right motor
-		pinMode(read_motors[i].get_pin_num[PIN_1], OUTPUT);
-		pinMode(read_motors[i].get_pin_num[PIN_2], OUTPUT);
-		pinMode(read_motors[i].get_pin_num[R_PWM], PWM_OUTPUT);
+		pinMode(read_motors[i].get_pin_num(PIN_1), INPUT);
+		pinMode(read_motors[i].get_pin_num(PIN_2), INPUT);
+		pinMode(read_motors[i].get_pin_num(PIN_PWM), INPUT);
 	}
 //	pinMode(R_1, INPUT);
 //	pinMode(R_2, INPUT);
