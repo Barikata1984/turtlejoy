@@ -8,9 +8,9 @@
 #ifndef	__DEFINITIONS_H__
 #define	__DEFINITIONS_H__
 
-#define FREQUENCY	  30
+#define FREQUENCY	  40
 #define PERIOD		  20
-#define TICK		1023 
+#define TICK		1024 
 
 // define gpio pins to control motors
 #define	R_1		11
@@ -26,6 +26,7 @@
 #define PIN_2	 1	// the pin set the revolution speed of the right motor
 #define PIN_PWM	 2	// the pin set the revolution speed of the right motor
 
-#define PWM_CLOCK	1023
+#define PWM_CLOCK	 400	
+#define PWM_RANGE	1024
 
 #endif

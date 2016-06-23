@@ -47,21 +47,21 @@ int main(int argv, char **argc){
 
 	// genetate subscriber
 //	ros::Subscriber sub = nh.subscribe<geometry_msgs::Twist>("/joy0", 100, boost::bind(messageCallBack, _1, &joy_commands));
-	ros::Subscriber sub = nh.subscribe("/joy0", 100, messageCallBack);
+	ros::Subscriber sub = nh.subscribe("/joy0", 1000, messageCallBack);
 	ros::Rate rate(FREQUENCY);		// set frequency.
  
  	// repeat till <C-c> is inputted.
 	while(ros::ok()){
 		ROS_INFO_STREAM("_/_/_/_/_/_/_/_/_/_/_/_/");
-		for(int i; i<joy_commands.size(); i++){
+		for(int i=0; i<joy_commands.size(); i++){
 			motors[i].driver(joy_commands[i]);
 
 			switch(i){
-			case 0:
-				ROS_INFO_STREAM("Right: " << motors[i].get_rev());
+			case RIGHT:
+//				ROS_INFO_STREAM("Right: " << motors[i].get_rev());
 				break;
-			case 1:
-				ROS_INFO_STREAM("Left : " << motors[i].get_rev());
+			case LEFT:
+//				ROS_INFO_STREAM("Left : " << motors[i].get_rev());
 				ROS_INFO_STREAM("");
 				break;
 			}
@@ -118,19 +118,19 @@ int main(int argv, char **argc){
 // callback function
 void messageCallBack(const geometry_msgs::Twist &twist) {
 //void messageCallBack(const geometry_msgs::Twist &twist, vector<int>::iterator write_command){
-	joy_commands[RIGHT]	= (int)TICK * twist.angular.y;
-	joy_commands[LEFT]	= (int)TICK * twist.linear.x;
+	joy_commands[RIGHT]	= (int)(TICK * twist.angular.y);
+	joy_commands[LEFT]	= (int)(TICK * twist.linear.x);
 
 //	ROS_INFO_STREAM("_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/");
-//	ROS_INFO_STREAM("R-Rev-COMMAND: " << motors[RIGHT].get_rev());
-//	ROS_INFO_STREAM("L-Rev-COMMAND: " << motors[LEFT].get_rev());
+//	ROS_INFO_STREAM("R-Rev-COMMAND: " << joy_commands[RIGHT]);
+//	ROS_INFO_STREAM("L-Rev-COMMAND: " << joy_commands[LEFT]);
 //	ROS_INFO_STREAM("");
 }
 
 int initialize_gpio(vector<motor_status> &read_motors) {
 	wiringPiSetupGpio();
 
-	for(int i; i<read_motors.size(); i++){
+	for(int i=0; i<read_motors.size(); i++){
 		// set pi-node for the right motor
 		pinMode(read_motors[i].get_pin_num(PIN_1), OUTPUT);
 		pinMode(read_motors[i].get_pin_num(PIN_2), OUTPUT);
@@ -144,8 +144,8 @@ int initialize_gpio(vector<motor_status> &read_motors) {
 
 	// set pwm 
 	pwmSetMode(PWM_MODE_MS);
-	pwmSetClock(400);
-	pwmSetRange(PWM_CLOCK);
+	pwmSetClock(PWM_CLOCK);
+	pwmSetRange(PWM_RANGE);
 }
 
 int terminate_gpio(vector<motor_status> &read_motors) {

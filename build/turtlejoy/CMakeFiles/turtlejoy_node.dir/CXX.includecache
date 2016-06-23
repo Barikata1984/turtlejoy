@@ -25,6 +25,8 @@ vector
 -
 motor_status.h
 /home/pi/ros/turtlejoy_ws/src/turtlejoy/src/motor_status.h
+ros/ros.h
+-
 
 /home/pi/ros/turtlejoy_ws/src/turtlejoy/src/turtlejoy_node.cpp
 ros/ros.h
