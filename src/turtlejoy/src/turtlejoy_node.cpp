@@ -24,7 +24,10 @@ void messageCallBack(const geometry_msgs::Twist &twis);
 int initialize_gpio(vector<motor_status> &read_motors);
 int terminate_gpio(vector<motor_status> &read_motors);
 
+
+// - - - - - - - - - - - - - - - -
 // main loop.
+// - - - - - - - - - - - - - - - -
 int main(int argv, char **argc){
 	vector<motor_status>	motors{
 								motor_status(R_1, R_2, R_PWM),
@@ -36,13 +39,13 @@ int main(int argv, char **argc){
 	ros::NodeHandle nh;
 	
 	//------------------------------------------
-	ROS_INFO_STREAM("Hi! me's the Turtlejoy!!");
+	ROS_INFO_STREAM("Hi! me's Turtlejoy!!");
 	//------------------------------------------
 
 	initialize_gpio(motors);
 	
 	//------------------------------------------
-	ROS_INFO_STREAM("GPIO initialized");
+	ROS_INFO_STREAM("GPIO is initialized!!");
 	//------------------------------------------
 
 	// genetate subscriber
@@ -67,51 +70,13 @@ int main(int argv, char **argc){
 			}
 		}
 
-//		motors[RIGHT].set_current_flag(right_rev);
-//		cout << "right_flag is" << motors[RIGHT].get_current_flag() << endl;
-//		if(motors[RIGHT].check_flags()){
-//			switch(motors[RIGHT].get_current_flag()){
-//			case 0: //				digitalWrite(R_1, 0);
-//				digitalWrite(R_2, 1);
-//				break;
-//				ROS_INFO_STREAM("Hi!");
-//			case 1:
-//				digitalWrite(R_1, 0);
-//				digitalWrite(R_2, 0);
-//				break;
-//				ROS_INFO_STREAM("It's!!");
-//			case 2:
-//				digitalWrite(R_1, 1);
-//				digitalWrite(R_2, 0);
-//				break;
-//				ROS_INFO_STREAM("Me!!!");
-//			}	
-//		}
-//		pwmWrite(R_PWM, abs(right_rev));
-//		
-////		if(left_rev > 128){
-////			digitalWrite(L_1, 1);
-////			digitalWrite(L_2, 0);
-////			pwmWrite(L_PWM, abs(left_rev));
-////		}else if(left_rev < -128){
-////			digitalWrite(L_1, 0);
-////			digitalWrite(L_2, 1);
-////			pwmWrite(L_PWM, abs(left_rev));
-////		}else{
-////			digitalWrite(L_1, 0);
-////			digitalWrite(L_2, 0);
-////			pwmWrite(L_PWM, 0);
-////		}
-//
-//		motors[RIGHT].set_past_flag();
-		
 		ros::spinOnce();
 		rate.sleep();
 	}
 
 	terminate_gpio(motors);
 
-	ROS_INFO_STREAM("See you later, master.");	
+	ROS_INFO_STREAM("See you later, master!!");	
 	return 0;
 }
 
@@ -128,7 +93,7 @@ void messageCallBack(const geometry_msgs::Twist &twist) {
 }
 
 int initialize_gpio(vector<motor_status> &read_motors) {
-	wiringPiSetupGpio();
+	wiringPiSetupGpio();	// the function from "wiringPi.h" used to setup gpio pins. This function must be used with root authorization. 
 
 	for(int i=0; i<read_motors.size(); i++){
 		// set pi-node for the right motor
@@ -136,12 +101,7 @@ int initialize_gpio(vector<motor_status> &read_motors) {
 		pinMode(read_motors[i].get_pin_num(PIN_2), OUTPUT);
 		pinMode(read_motors[i].get_pin_num(PIN_PWM), PWM_OUTPUT);
 	}
-
-	// set pi-node for the left motor
-//	pinMode(L_1, OUTPUT);
-//	pinMode(L_2, OUTPUT);
-//	pinMode(L_PWM, PWM_OUTPUT);
-
+	
 	// set pwm 
 	pwmSetMode(PWM_MODE_MS);
 	pwmSetClock(PWM_CLOCK);
@@ -155,11 +115,4 @@ int terminate_gpio(vector<motor_status> &read_motors) {
 		pinMode(read_motors[i].get_pin_num(PIN_2), INPUT);
 		pinMode(read_motors[i].get_pin_num(PIN_PWM), INPUT);
 	}
-//	pinMode(R_1, INPUT);
-//	pinMode(R_2, INPUT);
-//	pinMode(R_PWM, INPUT);
-
-//	pinMode(L_1, INPUT);
-//	pinMode(L_2, INPUT);
-//	pinMode(L_PWM, INPUT);
 }

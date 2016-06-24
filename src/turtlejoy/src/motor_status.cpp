@@ -1,15 +1,13 @@
 //-------------------------------------
-//	- - - - - - TurtleJoy - - - - - -
+// - - - - - motor_status.h - - - - - -
 //-------------------------------------
-//	This code is written based on the sample code from
-//	"http://forestofazumino.web.fc2.com/" and 
-//	modified by Barikata1984
 
 #include <wiringPi.h>
 #include <stdlib.h>
 #include <vector>
 #include "motor_status.h"
 #include <ros/ros.h>
+
 using namespace std;
 
 motor_status::motor_status(){
@@ -47,8 +45,7 @@ void motor_status::driver(int write_command){
 	set_current_flag(rev);
 //	ROS_INFO_STREAM("I'm moving!!!!");
 	if(check_flags()){
-//	ROS_INFO_STREAM("I'm moving!!!!");
-//		ROS_INFO_STREAM("flag: " << get_current_flag());
+	//	ROS_INFO_STREAM("I'm moving!!!!");
 		switch(get_current_flag()){
 		case 0:
 			digitalWrite(pin_num[PIN_1], 0);

@@ -1,9 +1,6 @@
 //-------------------------------------
-//	- - - - - - TurtleJoy - - - - - -
+// - - - - - motor_status.h - - - - - -
 //-------------------------------------
-//	This code is written based on the sample code from
-//	"http://forestofazumino.web.fc2.com/" and 
-//	modified by Barikata1984
 
 #include <wiringPi.h>
 #include <vector>
